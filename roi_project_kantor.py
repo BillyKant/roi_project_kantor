@@ -9,7 +9,7 @@ class User_Mixin():
                 if user not in self.users:
                     self.users[user] = {}
                     self.users[user]['user_name'] = user
-                    self.user = user  # todo: temporary var to allow code to run
+                    self.user = user  
                     break
                 else:
                     print('\nThis User Name already exists, please choose another')
@@ -28,7 +28,7 @@ class User_Mixin():
 
             phone = input('\nPhone Number: ')
             self.users[user]['phone_num'] = phone 
-            print(self.users)
+            print(f'\n{self.users}')
 
 
 
@@ -37,13 +37,14 @@ class ROI_Calculator(User_Mixin):
 
     def __init__(self):
         self.users = {}
-        self.user = '' # todo temp var to allow code to run
-        self.prop = ''
+        self.user = {} 
+        self.prop = {}
+        self.data_flag = True
 
 
-    # Method to run program
+    # ***Method to run program***
     def start(self):
-        print("""
+        print("""\n
     --- Welcome to the KANT-RENT ROI Calculator ----
 
         - What would you like to do? -
@@ -81,10 +82,10 @@ class ROI_Calculator(User_Mixin):
                         print('\nIncorrect password, please try again...')
                 break
             # todo: add other methods to continue program (maybe put sign-in/sign-up in it's own method? maybe make it part of User_Mixin?)
-            #Sign up
+            # Sign up
             elif action1 == '2':
                 self.create_user()
-                print("""
+                print("""\n
         - What would you like to do? -
 
             [1] Login
@@ -102,42 +103,59 @@ class ROI_Calculator(User_Mixin):
 
         self.menu()
 
-    # Method for main menu   
+    # ***Method for main menu***   
     def menu(self):
 
-        print("""\n
+        while True:
+            print("""\n
     --- What would you like to do? ---
 
         [1] Add a new Property
-        [2] See my properties 
-        [3] Change a property's info
+        [2] See my information
+        [3] Change ROI data
         [4] Switch User
+        [5] Quit
 
         """)
-        selection = input('\nInput: ')
-        if selection == '1':
-            self.new_property()
+            selection = input('\nInput: ')
+            if selection == '1':
+                self.new_property()
+            elif selection == '2':
+                if self.prop != {}:      
+                    print(f'\n{self.users[self.user]}')  
+                else:
+                    print("\nYou don't have any properties yet.")
+            elif selection == '3':
+                self.change_data()
+            elif selection == '4':
+                self.start()
+            elif selection == '5':
+                break
 
 
 
-    # Method to create a new property
+    # ***Method to create a new property***
     def new_property(self):
         
-        while True:
-            prop = input('\nStreet Address: ')
-            if prop not in self.users[self.user]:            # ! How do I access a user created in mixin and then input in class method
-                self.users[self.user][prop] = {}         # todo: need to adjust user variable
-                self.users[self.user][prop]['street address'] = prop 
-                self.prop = prop
-                break
-            else:
-                print('\nThis property already exists, please choose another')
+        if self.data_flag == True:
+            while True:
+                prop = input('\nStreet Address: ')
+                if prop not in self.users[self.user]:            
+                    self.users[self.user][prop] = {}         
+                    self.users[self.user][prop]['street address'] = prop 
+                    self.prop = prop
+                    break
+                else:
+                    print('\nThis property already exists, please choose another')
+
+        else:
+            prop = input('\nWhat property would you ')
 
         city = input('\nCity: ')
         self.users[self.user][self.prop]['city'] = city
-        state = input('State: ')
+        state = input('\nState: ')
         self.users[self.user][self.prop]['state'] = state
-        zip = input('Zip code: ')
+        zip = input('\nZip code: ')
         self.users[self.user][self.prop]['zip'] = zip
 
         self.roi_info()
@@ -145,20 +163,27 @@ class ROI_Calculator(User_Mixin):
     
 
     def roi_info(self):
-        income_lst = ['rent','laundry','storage']
-        expenses_lst = ['mortgage','taxes','utilities','vacancy','repairs','capEx']
-        self.users[self.user][self.prop]['roi'] = {}
+        income_lst = ['rent','laundry','storage','other']
+        expense_lst = ['mortgage','taxes','insurance','utilities','vacancy','repairs','capEx','manager','hoa','other']
+        cash_on_cash_lst = ['down payment','closing costs','rehab budget','other']
+        
 
-        #Income
-        print("\nPlease tell us about the monthly income this property will generate.")
-        # Create library to store incomes
-        self.users[self.user][self.prop]['roi']['income'] = {}
+
+        # ***Income***
+        if self.data_flag == True:  # !
+            self.users[self.user][self.prop]['roi'] = {}
+            print("\nTell us about the monthly income this property will generate.")
+            # Create library to store incomes
+            self.users[self.user][self.prop]['roi']['income'] = {}
 
         while True:
-            #While loop to allow user to add incomes
-            print(income_lst) 
-            incomes = input("\nPlease enter an expense you would like to add from the list (enter 'q' to quit): ")
-            if incomes in income_lst:
+            # While True loop to allow user to add income categories and assign values
+            print(f'\n{income_lst}') 
+            if self.data_flag == True: # !
+                incomes = input("\nPlease enter an income you would like to add from the list (enter 'q' to quit)?: ")
+            else:                       # !
+                incomes = input("\nWhich incomes from the list would you like to add or change (enter 'q' to quit)?: ")
+            if incomes in income_lst: 
                 amount = int(input("\nHow much will this be per month?: "))
                 self.users[self.user][self.prop]['roi']['income'][incomes] = amount
             elif incomes == 'q':
@@ -167,64 +192,94 @@ class ROI_Calculator(User_Mixin):
                 print('\nDoes not recognize input, please try again.')
 
         # Sum all income values for total
-        
         k = self.users[self.user][self.prop]['roi']['income']
-        summation = sum(k.values())       
-        
-        self.users[self.user][self.prop]['roi']['income']['total'] = summation
-        print(self.users[self.user][self.prop]['roi']['income'])
-        print(self.users[self.user][self.prop]['roi']['income']['total'])
-        print(self.users)
+        summation_i = sum(k.values())       
+        self.users[self.user][self.prop]['roi']['income']['total'] = summation_i
 
-        # rent = input('Rent: ')
-        # self.users[self.user][self.prop]['roi']['income']['rent'] = int(rent)
 
-        # laundry_q = input("Is there a laundry? ('y' or 'n'): ")
-        # if laundry_q == 'y':
-        #     laundry = input('Laundry: ')
-        #     self.users[self.user][self.prop]['roi']['income']['laundry'] = int(laundry)
-        # storage_q = input("Is there storage? ('y' or 'n'): ")
-        # if storage_q == 'y':
-        #     storage = input('Storage: ')
-        #     self.users[self.user][self.prop]['roi']['income']['storage'] = int(storage)
+        # ***Expenses***
+        print("\nTell us about the monthly expenses that this property will incur.")
+        # Create library to store incomes
+        self.users[self.user][self.prop]['roi']['expense'] = {}
 
-        # self.users[self.user][self.prop]['roi']['income']['value'] = int(rent) + int(laundry) + int(storage)  # ! if I don't have cost in a category this does not work
-        
+        while True:
+            # While True loop to allow user to add income categories and assign values
+            print(f'\n{expense_lst}') 
+            if self.data_flag == True:
+                expenses = input("\nPlease enter an expense you would like to add from the list (enter 'q' to quit): ")
+            else:
+                expenses = input("\nWhich expenses from the list would you like to add or change (enter 'q' to quit)?: ")
+            if expenses in expense_lst:
+                amount = int(input("\nHow much will this be per month?: "))
+                self.users[self.user][self.prop]['roi']['expense'][expenses] = amount
+            elif expenses == 'q':
+                break
+            else:
+                print('\nDoes not recognize input, please try again.')
 
-        #Expenses
-        print("\nPlease tell us about the monthly expenses that this property will incur.")
-        self.users[self.user][self.prop]['roi']['expenses'] = {}
-        mortgage = input('Mortgage: ')
-        self.users[self.user][self.prop]['roi']['expenses']['mortgage'] = int(mortgage)
-        tax = input('Taxes: ')
-        self.users[self.user][self.prop]['roi']['expenses']['taxes'] = int(tax)
-        utilities = input('Utilities: ')
-        self.users[self.user][self.prop]['roi']['expenses']['utilities'] = int(utilities)
-        vacancy = input('Vacancy: ')
-        self.users[self.user][self.prop]['roi']['expenses']['vacancy'] = int(vacancy)
-        repairs = input('Repairs: ')
-        self.users[self.user][self.prop]['roi']['expenses']['repairs'] = int(repairs)
-        capEx = input('capEx: ')
-        self.users[self.user][self.prop]['roi']['expenses']['capEx'] = int(capEx)
+        # Sum all expense values for total
+        k = self.users[self.user][self.prop]['roi']['expense']
+        summation_e = sum(k.values())       
+        self.users[self.user][self.prop]['roi']['expense']['total'] = summation_e
 
-        manager_q = input("Is there a property manager? ('y' or 'n'): ")
-        if manager_q == 'y':
-            manager = input('Manager: ')
-            self.users[self.user][self.prop]['roi']['expenses']['manager'] = int(manager)
-        hoa_q = input("Is there a laundry? ('y' or 'n'): ")
-        if hoa_q == 'y':
-            hoa = input('HOA: ')
-            self.users[self.user][self.prop]['roi']['expenses']['hoa'] = int(hoa)
 
-        self.users[self.user][self.prop]['roi']['expenses']['value'] = int(mortgage) + int(tax) + int(utilities) + int(vacancy) + int(repairs) + int(capEx) + int(manager) + int(hoa) # ! if I don't have cost in a category this does not work
-    
+        # ***Cash Flow***
+        self.users[self.user][self.prop]['roi']['monthly cash flow'] = summation_i - summation_e
+        cash_flow = self.users[self.user][self.prop]['roi']['monthly cash flow']
+        print(f"\nYour cash flow is {cash_flow}")
 
-        # self.menu()
 
+        # ***Cash on Cash ROI***
+        print("\nTell us about the expenses you put into purchasing and preparing the property.")
+        # Create library to store incomes
+        self.users[self.user][self.prop]['roi']['cash on cash'] = {}
+
+        while True:
+            # While True loop to allow user to add income categories and assign values
+            print(f'\n{cash_on_cash_lst}') 
+            if self.data_flag == True:
+                initial_expenses = input("\nPlease enter an expense you would like to add from the list (enter 'q' to quit): ")
+            else:
+                initial_expenses = input("\nWhich expenses from the list would you like to add or change (enter 'q' to quit)?: ")
+            if initial_expenses in cash_on_cash_lst:
+                amount = int(input("\nHow much was this expense?: "))
+                self.users[self.user][self.prop]['roi']['cash on cash'][initial_expenses] = amount
+            elif initial_expenses == 'q':
+                break
+            else:
+                print('\nDoes not recognize input, please try again.')
+
+        # Sum all investment expense values for total
+        k = self.users[self.user][self.prop]['roi']['cash on cash']
+        summation_c = sum(k.values())       
+        self.users[self.user][self.prop]['roi']['cash on cash']['total investment'] = summation_c
+
+        # Calculate ROI1
+        if cash_flow*12 > 0 and summation_c > 0: 
+            self.users[self.user][self.prop]['roi']['cash on cash']['ROI'] = ((cash_flow*12)/summation_c)*100
+            roi = self.users[self.user][self.prop]['roi']['cash on cash']['ROI']
+            print(f'\nYour ROI is {roi}%')
+
+
+    def change_data(self):
+        # print("""\n
+        # --- What would you like to change? ---
+
+        #         [1] Location Data
+        #         [2] ROI Data
+
+        # """)
+        # selection = input('\nInput: ')
+        # if selection == '1':
+        #     pass
+        # elif selection == '2':
+        self.data_flag = False
+        self.roi_info()
+        self.data_flag = True
 
 
     def test_dict(self):
-        print(self.users)
+        print(f'\n{self.users}')
 
 
 test1 = ROI_Calculator()
