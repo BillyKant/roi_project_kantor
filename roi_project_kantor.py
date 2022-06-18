@@ -170,7 +170,7 @@ class ROI_Calculator(User_Mixin):
 
 
         # ***Income***
-        if self.data_flag == True:  # !
+        if self.data_flag == True: 
             self.users[self.user][self.prop]['roi'] = {}
             print("\nTell us about the monthly income this property will generate.")
             # Create library to store incomes
@@ -179,9 +179,9 @@ class ROI_Calculator(User_Mixin):
         while True:
             # While True loop to allow user to add income categories and assign values
             print(f'\n{income_lst}') 
-            if self.data_flag == True: # !
+            if self.data_flag == True: 
                 incomes = input("\nPlease enter an income you would like to add from the list (enter 'q' to quit)?: ")
-            else:                       # !
+            else:                       
                 incomes = input("\nWhich incomes from the list would you like to add or change (enter 'q' to quit)?: ")
             if incomes in income_lst: 
                 amount = int(input("\nHow much will this be per month?: "))
@@ -198,9 +198,10 @@ class ROI_Calculator(User_Mixin):
 
 
         # ***Expenses***
-        print("\nTell us about the monthly expenses that this property will incur.")
-        # Create library to store incomes
-        self.users[self.user][self.prop]['roi']['expense'] = {}
+        if self.data_flag == True:
+            print("\nTell us about the monthly expenses that this property will incur.")
+            # Create library to store incomes
+            self.users[self.user][self.prop]['roi']['expense'] = {}
 
         while True:
             # While True loop to allow user to add income categories and assign values
@@ -230,9 +231,10 @@ class ROI_Calculator(User_Mixin):
 
 
         # ***Cash on Cash ROI***
-        print("\nTell us about the expenses you put into purchasing and preparing the property.")
-        # Create library to store incomes
-        self.users[self.user][self.prop]['roi']['cash on cash'] = {}
+        if self.data_flag == True:
+            print("\nTell us about the expenses you put into purchasing and preparing the property.")
+            # Create library to store incomes
+            self.users[self.user][self.prop]['roi']['cash on cash'] = {}
 
         while True:
             # While True loop to allow user to add income categories and assign values
